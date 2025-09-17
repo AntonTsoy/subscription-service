@@ -1,16 +1,24 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/AntonTsoy/subscription-service/internal/config"
+	"github.com/AntonTsoy/subscription-service/internal/database"
+	"log"
 )
 
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		panic(err)
+		log.Fatalf("ошибка конфига: %v", err)
 	}
 
-	fmt.Printf("Конфиг: %+v\n", cfg)
+	db, err := database.New(cfg)
+	if err != nil {
+		log.Fatalf("ошибка базы данных: %v", err)
+	}
+	defer db.Close()
+
+	if err = db.HealthCheck(); err != nil {
+		log.Fatalf("не удалось открыть соединение c базой данных: %v", err)
+	}
 }
