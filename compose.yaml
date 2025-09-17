@@ -1,6 +1,8 @@
+networks:
+  backend:
 
 services:
-  postgres:
+  db:
     image: postgres:17.0-alpine
     container_name: postgres_db
     env_file: .env
@@ -14,19 +16,23 @@ services:
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
 
   migrate:
     image: migrate/migrate
     container_name: migrate_db
     volumes:
       - ./migrations:/migrations
+    networks:
+      - backend
     command: [
       "-path", "/migrations",
       "-database", "postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=${DB_SSL_MODE}",
       "up"
     ]
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
 
 volumes:
