@@ -75,8 +75,12 @@ func (r *SubsRepo) Update(ctx context.Context, sub *models.Subscription) error {
 		return fmt.Errorf("ошибка обновления записи: %w", err)
 	}
 
-	if rows, err := res.RowsAffected(); err != nil || rows == 0 {
-		return fmt.Errorf("не удалось получить обновленную запись c id=%d", sub.ID)
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("не удалось обновить запись: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("не найдена подписка c id=%d", sub.ID)
 	}
 	return nil
 }
@@ -89,13 +93,22 @@ func (r *SubsRepo) Delete(ctx context.Context, id int) error {
 		return fmt.Errorf("ошибка удаления записи: %w", err)
 	}
 
-	if rows, err := res.RowsAffected(); err != nil || rows == 0 {
-		return fmt.Errorf("не удалось удалить запись c id=%d", id)
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("не удалось удалить запись: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("не найдена подписка c id=%d", id)
 	}
 	return nil
 }
 
-func (r *SubsRepo) ListByUserAndService(ctx context.Context, userID uuid.UUID, serviceName string, start, end time.Time) ([]models.Subscription, error) {
+func (r *SubsRepo) ListByUserAndService(
+	ctx context.Context,
+	userID uuid.UUID,
+	serviceName string,
+	start, end time.Time,
+) ([]models.Subscription, error) {
 	query := `
 		SELECT * FROM subscriptions
 		WHERE user_id = $1
