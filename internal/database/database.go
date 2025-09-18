@@ -11,7 +11,7 @@ import (
 )
 
 type Database struct {
-	DB *sqlx.DB
+	db *sqlx.DB
 }
 
 func New(cfg *config.Config) (*Database, error) {
@@ -30,18 +30,22 @@ func New(cfg *config.Config) (*Database, error) {
 	db.SetConnMaxLifetime(5 * time.Minute)
 	db.SetConnMaxIdleTime(2 * time.Minute)
 
-	return &Database{DB: db}, nil
+	return &Database{db: db}, nil
+}
+
+func (d *Database) DB() *sqlx.DB {
+	return d.db
 }
 
 func (d *Database) HealthCheck() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	return d.DB.PingContext(ctx)
+	return d.db.PingContext(ctx)
 }
 
 func (d *Database) Close() error {
-	if d.DB != nil {
-		return d.DB.Close()
+	if d.db != nil {
+		return d.db.Close()
 	}
 	return nil
 }

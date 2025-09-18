@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/AntonTsoy/subscription-service/internal/config"
 	"github.com/AntonTsoy/subscription-service/internal/database"
-	"log"
 )
 
 func main() {
