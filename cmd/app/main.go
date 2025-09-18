@@ -28,8 +28,9 @@ func main() {
 	/*
 		userId, _ := uuid.Parse("60601fee-2bf1-4721-ae6f-7636e79a0cba")
 		layout := "01-2006"
-		startDate, _ := time.Parse(layout, "07-2025")
-		testModel := models.Subscription{ServiceName: "Spotify", Price: 20, UserID: userId, StartDate: startDate}
+		startDate, _ := time.Parse(layout, "04-2025")
+		endDate := startDate.Add(1 * 31 * 24 * time.Hour)
+		testModel := models.Subscription{ServiceName: "Spotify", Price: 34, UserID: userId, StartDate: startDate, EndDate: &endDate}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 		defer cancel()

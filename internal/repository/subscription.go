@@ -3,8 +3,10 @@ package repository
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/AntonTsoy/subscription-service/internal/models"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -93,4 +95,19 @@ func (r *SubsRepo) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-// func (r *SubsRepo) Aggr(ctx context.Context, userID uuid.UUID, serviceName string) ([]models.Subscription, error) {}
+func (r *SubsRepo) ListByUserAndService(ctx context.Context, userID uuid.UUID, serviceName string, start, end time.Time) ([]models.Subscription, error) {
+	query := `
+		SELECT * FROM subscriptions
+		WHERE user_id = $1
+			AND service_name = $2
+			AND start_date <= $4
+			AND (end_date IS NULL OR end_date >= $3);
+	`
+
+	var subs []models.Subscription
+	if err := r.db.SelectContext(ctx, &subs, query, userID, serviceName, start, end); err != nil {
+		return nil, fmt.Errorf("ошибка получения подписок: %w", err)
+	}
+
+	return subs, nil
+}
