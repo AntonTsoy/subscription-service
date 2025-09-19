@@ -3,11 +3,15 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
 
 	"github.com/AntonTsoy/subscription-service/internal/config"
 	"github.com/AntonTsoy/subscription-service/internal/database"
 	"github.com/AntonTsoy/subscription-service/internal/repository"
 	"github.com/AntonTsoy/subscription-service/internal/service"
+	"github.com/AntonTsoy/subscription-service/internal/transport/handler"
 )
 
 func main() {
@@ -29,5 +33,15 @@ func main() {
 	subsRepo := repository.NewSubsRepo(db.DB())
 
 	subsService := service.NewSubsService(subsRepo)
-	fmt.Printf("%v\n", subsService)
+
+	subsHandler := handler.NewSubsHandler(subsService)
+
+	r := chi.NewRouter()
+	r.Post("/subscriptions", subsHandler.CreateSubscription)
+	r.Get("/subscriptions", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello World!"))
+	})
+
+	fmt.Println("Listen on http://localhost:8080/subscriptions")
+	http.ListenAndServe(":8080", r)
 }
