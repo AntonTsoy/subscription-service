@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 
 	"github.com/AntonTsoy/subscription-service/internal/config"
@@ -37,11 +39,17 @@ func main() {
 	subsHandler := handler.NewSubsHandler(subsService)
 
 	r := chi.NewRouter()
+	r.Use(middleware.Timeout(10 * time.Second))
+
 	r.Post("/subscriptions", subsHandler.CreateSubscription)
-	r.Get("/subscriptions", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/subscriptions/{id}", subsHandler.GetSubscription)
+	r.Get("/subscriptions", subsHandler.GetAllSubscriptions)
+	r.Put("/subscriptions/{id}", subsHandler.UpdateSubscription)
+	r.Delete("/subscriptions/{id}", subsHandler.DeleteSubscription)
+	r.Get("/subscriptions/hello", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
 
-	fmt.Println("Listen on http://localhost:8080/subscriptions")
+	fmt.Println("Listen on http://localhost:8080/subscriptions/hello")
 	http.ListenAndServe(":8080", r)
 }

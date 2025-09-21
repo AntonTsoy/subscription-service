@@ -34,10 +34,6 @@ func (s *SubsService) GetByID(ctx context.Context, id int) (*models.Subscription
 }
 
 func (s *SubsService) GetAll(ctx context.Context, limit, offset int) ([]models.Subscription, error) {
-	// TODO: улучшить логику обработки случая, когда limit и offset не указан
-	if limit == 0 {
-		limit = 200
-	}
 	return s.repo.GetAll(ctx, limit, offset)
 }
 
@@ -49,6 +45,7 @@ func (s *SubsService) Delete(ctx context.Context, id int) error {
 	return s.repo.Delete(ctx, id)
 }
 
-func (s *SubsService) EvaluateCostOfServiceIntervalSubscriptions() {
-	// TODO: реализовать метод
+func (s *SubsService) EvaluateTotalServiceSubscriptionsCost(ctx context.Context, userID uuid.UUID, serviceName string, start, end time.Time) (int, error) {
+	// TODO: implement right intervals summing
+	return 0, nil
 }
