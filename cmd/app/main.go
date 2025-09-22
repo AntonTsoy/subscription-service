@@ -26,11 +26,13 @@ import (
 // @host            localhost:8080
 // @schemes         http
 func main() {
+	fmt.Println("Start service")
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("ошибка конфига: %v", err)
 	}
 
+	fmt.Printf("%+v\n", cfg)
 	db, err := database.New(cfg)
 	if err != nil {
 		log.Fatalf("ошибка базы данных: %v", err)
