@@ -2,6 +2,18 @@ networks:
   backend:
 
 services:
+  app:
+    build: .
+    container_name: sub_service
+    env_file: .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
   db:
     image: postgres:17.0-alpine
     container_name: postgres_db
