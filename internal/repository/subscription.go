@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -36,6 +38,9 @@ func (r *SubsRepo) GetByID(ctx context.Context, id int) (*models.Subscription, e
 
 	var sub models.Subscription
 	if err := r.db.GetContext(ctx, &sub, query, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: не удалось получить подписку id %d", models.ErrSubscriptionNotFound, id)
+		}
 		return nil, fmt.Errorf("ошибка получения подписки: %w", err)
 	}
 	return &sub, nil
@@ -76,7 +81,7 @@ func (r *SubsRepo) Update(ctx context.Context, sub *models.Subscription) error {
 		return fmt.Errorf("не удалось обновить запись: %w", err)
 	}
 	if rows == 0 {
-		return fmt.Errorf("не найдена подписка c id=%d", sub.ID)
+		return fmt.Errorf("%w: обновление данных подписки id %d", models.ErrSubscriptionNotFound, sub.ID)
 	}
 	return nil
 }
@@ -94,7 +99,7 @@ func (r *SubsRepo) Delete(ctx context.Context, id int) error {
 		return fmt.Errorf("не удалось удалить запись: %w", err)
 	}
 	if rows == 0 {
-		return fmt.Errorf("не найдена подписка c id=%d", id)
+		return fmt.Errorf("%w: удаление подписки id %d", models.ErrSubscriptionNotFound, id)
 	}
 	return nil
 }

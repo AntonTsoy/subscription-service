@@ -39,13 +39,13 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает все подписки с пагинацией
+      description: Возвращает список всех подписок с поддержкой пагинации
       parameters:
-      - description: Max items (default 100)
+      - description: Максимальное количество элементов (по умолчанию 100)
         in: query
         name: limit
         type: integer
-      - description: Offset (default 0)
+      - description: Смещение от начала (по умолчанию 0)
         in: query
         name: offset
         type: integer
@@ -53,13 +53,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Список подписок
           schema:
             items:
               $ref: '#/definitions/dto.SubscriptionResponse'
             type: array
         "500":
-          description: failed to get subscriptions
+          description: Ошибка при получении списка подписок
           schema:
             type: string
       summary: Список подписок
@@ -68,9 +68,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Создаёт новую подписку пользователю
+      description: Создаёт новую подписку для пользователя
       parameters:
-      - description: Subscription data
+      - description: Данные новой подписки
         in: body
         name: request
         required: true
@@ -80,15 +80,15 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Созданная подписка
           schema:
             $ref: '#/definitions/dto.SubscriptionResponse'
         "400":
-          description: invalid request
+          description: Некорректные данные запроса
           schema:
             type: string
         "500":
-          description: failed to create subscription
+          description: Ошибка при создании подписки
           schema:
             type: string
       summary: Создать подписку
@@ -98,9 +98,9 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Удаляет подписку по ID
+      description: Удаляет подписку по её ID
       parameters:
-      - description: Subscription ID
+      - description: ID подписки
         in: path
         name: id
         required: true
@@ -109,15 +109,17 @@ paths:
       - application/json
       responses:
         "204":
-          description: no content
+          description: Подписка успешно удалена
+        "400":
+          description: Некорректный ID
           schema:
             type: string
-        "400":
-          description: invalid id
+        "404":
+          description: Подписка не найдена
           schema:
             type: string
         "500":
-          description: failed to delete subscription
+          description: Ошибка при удалении подписки
           schema:
             type: string
       summary: Удалить подписку
@@ -126,9 +128,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает подписку по её ID
+      description: Возвращает информацию о подписке по её ID
       parameters:
-      - description: Subscription ID
+      - description: ID подписки
         in: path
         name: id
         required: true
@@ -137,15 +139,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Подписка
           schema:
             $ref: '#/definitions/dto.SubscriptionResponse'
         "400":
-          description: invalid id
+          description: Некорректный ID
+          schema:
+            type: string
+        "404":
+          description: Подписка не найдена
           schema:
             type: string
         "500":
-          description: failed to get subscription
+          description: Ошибка при получении подписки
           schema:
             type: string
       summary: Получить подписку
@@ -154,14 +160,14 @@ paths:
     put:
       consumes:
       - application/json
-      description: Обновляет данные подписки по ID
+      description: Обновляет данные подписки по её ID
       parameters:
-      - description: Subscription ID
+      - description: ID подписки
         in: path
         name: id
         required: true
         type: integer
-      - description: Updated subscription
+      - description: Обновлённые данные подписки
         in: body
         name: request
         required: true
@@ -171,15 +177,17 @@ paths:
       - application/json
       responses:
         "204":
-          description: no content
+          description: Подписка успешно обновлена
+        "400":
+          description: Некорректные данные запроса
           schema:
             type: string
-        "400":
-          description: invalid request
+        "404":
+          description: Подписка не найдена
           schema:
             type: string
         "500":
-          description: failed to update subscription
+          description: Ошибка при обновлении подписки
           schema:
             type: string
       summary: Обновить подписку
@@ -189,24 +197,24 @@ paths:
     get:
       consumes:
       - application/json
-      description: Считает суммарную стоимость подписок пользователя на сервис за
-        период [start; end]
+      description: Считает суммарную стоимость подписок пользователя на конкретный
+        сервис за период [start; end]
       parameters:
-      - description: Start date (MM-YYYY)
+      - description: Начало периода (MM-YYYY)
         in: path
         name: start
         required: true
         type: string
-      - description: End date (MM-YYYY)
+      - description: Конец периода (MM-YYYY)
         in: path
         name: end
         required: true
         type: string
-      - description: User UUID (optional)
+      - description: UUID пользователя (опционально)
         in: query
         name: user_id
         type: string
-      - description: Service name (optional)
+      - description: Название сервиса (опционально)
         in: query
         name: service_name
         type: string
@@ -214,17 +222,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: total cost
+          description: Суммарная стоимость подписок
           schema:
             additionalProperties:
               type: integer
             type: object
         "400":
-          description: invalid parameters
+          description: Некорректные параметры запроса
           schema:
             type: string
         "500":
-          description: failed to calculate cost
+          description: Ошибка при вычислении стоимости
           schema:
             type: string
       summary: Общая стоимость подписок

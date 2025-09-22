@@ -18,7 +18,7 @@ const docTemplate = `{
     "paths": {
         "/subscriptions": {
             "get": {
-                "description": "Возвращает все подписки с пагинацией",
+                "description": "Возвращает список всех подписок с поддержкой пагинации",
                 "consumes": [
                     "application/json"
                 ],
@@ -32,20 +32,20 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Max items (default 100)",
+                        "description": "Максимальное количество элементов (по умолчанию 100)",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Offset (default 0)",
+                        "description": "Смещение от начала (по умолчанию 0)",
                         "name": "offset",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Список подписок",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -54,7 +54,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "failed to get subscriptions",
+                        "description": "Ошибка при получении списка подписок",
                         "schema": {
                             "type": "string"
                         }
@@ -62,7 +62,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Создаёт новую подписку пользователю",
+                "description": "Создаёт новую подписку для пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -75,7 +75,7 @@ const docTemplate = `{
                 "summary": "Создать подписку",
                 "parameters": [
                     {
-                        "description": "Subscription data",
+                        "description": "Данные новой подписки",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -86,19 +86,19 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Созданная подписка",
                         "schema": {
                             "$ref": "#/definitions/dto.SubscriptionResponse"
                         }
                     },
                     "400": {
-                        "description": "invalid request",
+                        "description": "Некорректные данные запроса",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "failed to create subscription",
+                        "description": "Ошибка при создании подписки",
                         "schema": {
                             "type": "string"
                         }
@@ -108,7 +108,7 @@ const docTemplate = `{
         },
         "/subscriptions/{id}": {
             "get": {
-                "description": "Возвращает подписку по её ID",
+                "description": "Возвращает информацию о подписке по её ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -122,7 +122,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Subscription ID",
+                        "description": "ID подписки",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -130,19 +130,25 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Подписка",
                         "schema": {
                             "$ref": "#/definitions/dto.SubscriptionResponse"
                         }
                     },
                     "400": {
-                        "description": "invalid id",
+                        "description": "Некорректный ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Подписка не найдена",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "failed to get subscription",
+                        "description": "Ошибка при получении подписки",
                         "schema": {
                             "type": "string"
                         }
@@ -150,7 +156,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Обновляет данные подписки по ID",
+                "description": "Обновляет данные подписки по её ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -164,13 +170,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Subscription ID",
+                        "description": "ID подписки",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Updated subscription",
+                        "description": "Обновлённые данные подписки",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -181,19 +187,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "no content",
+                        "description": "Подписка успешно обновлена"
+                    },
+                    "400": {
+                        "description": "Некорректные данные запроса",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "400": {
-                        "description": "invalid request",
+                    "404": {
+                        "description": "Подписка не найдена",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "failed to update subscription",
+                        "description": "Ошибка при обновлении подписки",
                         "schema": {
                             "type": "string"
                         }
@@ -201,7 +210,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Удаляет подписку по ID",
+                "description": "Удаляет подписку по её ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -215,7 +224,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Subscription ID",
+                        "description": "ID подписки",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -223,19 +232,22 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "no content",
+                        "description": "Подписка успешно удалена"
+                    },
+                    "400": {
+                        "description": "Некорректный ID",
                         "schema": {
                             "type": "string"
                         }
                     },
-                    "400": {
-                        "description": "invalid id",
+                    "404": {
+                        "description": "Подписка не найдена",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "failed to delete subscription",
+                        "description": "Ошибка при удалении подписки",
                         "schema": {
                             "type": "string"
                         }
@@ -245,7 +257,7 @@ const docTemplate = `{
         },
         "/subscriptions/{start}/{end}/total-cost": {
             "get": {
-                "description": "Считает суммарную стоимость подписок пользователя на сервис за период [start; end]",
+                "description": "Считает суммарную стоимость подписок пользователя на конкретный сервис за период [start; end]",
                 "consumes": [
                     "application/json"
                 ],
@@ -259,34 +271,34 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Start date (MM-YYYY)",
+                        "description": "Начало периода (MM-YYYY)",
                         "name": "start",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "End date (MM-YYYY)",
+                        "description": "Конец периода (MM-YYYY)",
                         "name": "end",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "User UUID (optional)",
+                        "description": "UUID пользователя (опционально)",
                         "name": "user_id",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Service name (optional)",
+                        "description": "Название сервиса (опционально)",
                         "name": "service_name",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "total cost",
+                        "description": "Суммарная стоимость подписок",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -295,13 +307,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "invalid parameters",
+                        "description": "Некорректные параметры запроса",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "failed to calculate cost",
+                        "description": "Ошибка при вычислении стоимости",
                         "schema": {
                             "type": "string"
                         }

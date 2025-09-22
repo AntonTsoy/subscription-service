@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -31,14 +32,14 @@ func NewSubsHandler(service SubscriptionService) *SubsHandler {
 
 // CreateSubscription godoc
 // @Summary      Создать подписку
-// @Description  Создаёт новую подписку пользователю
+// @Description  Создаёт новую подписку для пользователя
 // @Tags         subscriptions
 // @Accept       json
 // @Produce      json
-// @Param        request body dto.SubscriptionRequest true "Subscription data"
-// @Success      201 {object} dto.SubscriptionResponse
-// @Failure      400 {string} string "invalid request"
-// @Failure      500 {string} string "failed to create subscription"
+// @Param        request body dto.SubscriptionRequest true "Данные новой подписки"
+// @Success      201 {object} dto.SubscriptionResponse "Созданная подписка"
+// @Failure      400 {string} string "Некорректные данные запроса"
+// @Failure      500 {string} string "Ошибка при создании подписки"
 // @Router       /subscriptions [post]
 func (h *SubsHandler) CreateSubscription(w http.ResponseWriter, r *http.Request) {
 	var req dto.SubscriptionRequest
@@ -65,14 +66,15 @@ func (h *SubsHandler) CreateSubscription(w http.ResponseWriter, r *http.Request)
 
 // GetSubscription godoc
 // @Summary      Получить подписку
-// @Description  Возвращает подписку по её ID
+// @Description  Возвращает информацию о подписке по её ID
 // @Tags         subscriptions
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "Subscription ID"
-// @Success      200 {object} dto.SubscriptionResponse
-// @Failure      400 {string} string "invalid id"
-// @Failure      500 {string} string "failed to get subscription"
+// @Param        id path int true "ID подписки"
+// @Success      200 {object} dto.SubscriptionResponse "Подписка"
+// @Failure      400 {string} string "Некорректный ID"
+// @Failure      404 {string} string "Подписка не найдена"
+// @Failure      500 {string} string "Ошибка при получении подписки"
 // @Router       /subscriptions/{id} [get]
 func (h *SubsHandler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := getIntPathParam(r, "id")
@@ -83,6 +85,10 @@ func (h *SubsHandler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 
 	sub, err := h.service.GetByID(r.Context(), id)
 	if err != nil {
+		if errors.Is(err, models.ErrSubscriptionNotFound) {
+			http.Error(w, fmt.Sprintf("{'error': 'подписка id %d не найдена'}", id), http.StatusNotFound)
+			return
+		}
 		http.Error(w, "failed to get subscription", http.StatusInternalServerError)
 		return
 	}
@@ -94,14 +100,14 @@ func (h *SubsHandler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 
 // GetAllSubscriptions godoc
 // @Summary      Список подписок
-// @Description  Возвращает все подписки с пагинацией
+// @Description  Возвращает список всех подписок с поддержкой пагинации
 // @Tags         subscriptions
 // @Accept       json
 // @Produce      json
-// @Param        limit query int false "Max items (default 100)"
-// @Param        offset query int false "Offset (default 0)"
-// @Success      200 {array} dto.SubscriptionResponse
-// @Failure      500 {string} string "failed to get subscriptions"
+// @Param        limit query int false "Максимальное количество элементов (по умолчанию 100)"
+// @Param        offset query int false "Смещение от начала (по умолчанию 0)"
+// @Success      200 {array} dto.SubscriptionResponse "Список подписок"
+// @Failure      500 {string} string "Ошибка при получении списка подписок"
 // @Router       /subscriptions [get]
 func (h *SubsHandler) GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	limit := getIntQueryParam(r, "limit", 100)
@@ -125,15 +131,16 @@ func (h *SubsHandler) GetAllSubscriptions(w http.ResponseWriter, r *http.Request
 
 // UpdateSubscription godoc
 // @Summary      Обновить подписку
-// @Description  Обновляет данные подписки по ID
+// @Description  Обновляет данные подписки по её ID
 // @Tags         subscriptions
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "Subscription ID"
-// @Param        request body dto.SubscriptionRequest true "Updated subscription"
-// @Success      204 {string} string "no content"
-// @Failure      400 {string} string "invalid request"
-// @Failure      500 {string} string "failed to update subscription"
+// @Param        id path int true "ID подписки"
+// @Param        request body dto.SubscriptionRequest true "Обновлённые данные подписки"
+// @Success      204 "Подписка успешно обновлена"
+// @Failure      400 {string} string "Некорректные данные запроса"
+// @Failure      404 {string} string "Подписка не найдена"
+// @Failure      500 {string} string "Ошибка при обновлении подписки"
 // @Router       /subscriptions/{id} [put]
 func (h *SubsHandler) UpdateSubscription(w http.ResponseWriter, r *http.Request) {
 	var req dto.SubscriptionRequest
@@ -155,6 +162,10 @@ func (h *SubsHandler) UpdateSubscription(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := h.service.Update(r.Context(), newSubData); err != nil {
+		if errors.Is(err, models.ErrSubscriptionNotFound) {
+			http.Error(w, fmt.Sprintf("{'error': 'подписка id %d не найдена'}", newSubData.ID), http.StatusNotFound)
+			return
+		}
 		http.Error(w, "failed to update subscription", http.StatusInternalServerError)
 		return
 	}
@@ -164,14 +175,15 @@ func (h *SubsHandler) UpdateSubscription(w http.ResponseWriter, r *http.Request)
 
 // DeleteSubscription godoc
 // @Summary      Удалить подписку
-// @Description  Удаляет подписку по ID
+// @Description  Удаляет подписку по её ID
 // @Tags         subscriptions
 // @Accept       json
 // @Produce      json
-// @Param        id path int true "Subscription ID"
-// @Success      204 {string} string "no content"
-// @Failure      400 {string} string "invalid id"
-// @Failure      500 {string} string "failed to delete subscription"
+// @Param        id path int true "ID подписки"
+// @Success      204 "Подписка успешно удалена"
+// @Failure      400 {string} string "Некорректный ID"
+// @Failure      404 {string} string "Подписка не найдена"
+// @Failure      500 {string} string "Ошибка при удалении подписки"
 // @Router       /subscriptions/{id} [delete]
 func (h *SubsHandler) DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := getIntPathParam(r, "id")
@@ -181,6 +193,10 @@ func (h *SubsHandler) DeleteSubscription(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := h.service.Delete(r.Context(), id); err != nil {
+		if errors.Is(err, models.ErrSubscriptionNotFound) {
+			http.Error(w, fmt.Sprintf("{'error': 'подписка id %d не найдена'}", id), http.StatusNotFound)
+			return
+		}
 		http.Error(w, "failed to delete subscription", http.StatusInternalServerError)
 		return
 	}
@@ -190,17 +206,17 @@ func (h *SubsHandler) DeleteSubscription(w http.ResponseWriter, r *http.Request)
 
 // TotalServiceSubscriptionsCost godoc
 // @Summary      Общая стоимость подписок
-// @Description  Считает суммарную стоимость подписок пользователя на сервис за период [start; end]
+// @Description  Считает суммарную стоимость подписок пользователя на конкретный сервис за период [start; end]
 // @Tags         subscriptions
 // @Accept       json
 // @Produce      json
-// @Param        start path string true "Start date (MM-YYYY)"
-// @Param        end path string true "End date (MM-YYYY)"
-// @Param        user_id query string false "User UUID (optional)"
-// @Param        service_name query string false "Service name (optional)"
-// @Success      200 {object} map[string]int "total cost"
-// @Failure      400 {string} string "invalid parameters"
-// @Failure      500 {string} string "failed to calculate cost"
+// @Param        start path string true "Начало периода (MM-YYYY)"
+// @Param        end path string true "Конец периода (MM-YYYY)"
+// @Param        user_id query string false "UUID пользователя (опционально)"
+// @Param        service_name query string false "Название сервиса (опционально)"
+// @Success      200 {object} map[string]int "Суммарная стоимость подписок"
+// @Failure      400 {string} string "Некорректные параметры запроса"
+// @Failure      500 {string} string "Ошибка при вычислении стоимости"
 // @Router       /subscriptions/{start}/{end}/total-cost [get]
 func (h *SubsHandler) TotalServiceSubscriptionsCost(w http.ResponseWriter, r *http.Request) {
 	var req dto.TotalSubscriptionsCostRequest
