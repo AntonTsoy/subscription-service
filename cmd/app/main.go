@@ -6,8 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	_ "github.com/AntonTsoy/subscription-service/docs"
+
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/AntonTsoy/subscription-service/internal/config"
 	"github.com/AntonTsoy/subscription-service/internal/database"
@@ -16,6 +19,12 @@ import (
 	"github.com/AntonTsoy/subscription-service/internal/transport/handler"
 )
 
+// @title           Subscription Service API
+// @version         1.0
+// @description     REST API для управления подписками
+// @BasePath        /
+// @host            localhost:8080
+// @schemes         http
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
@@ -46,11 +55,10 @@ func main() {
 	r.Get("/subscriptions", subsHandler.GetAllSubscriptions)
 	r.Put("/subscriptions/{id}", subsHandler.UpdateSubscription)
 	r.Delete("/subscriptions/{id}", subsHandler.DeleteSubscription)
-	r.Get("/subscriptions/{start_date}/{end_date}/total-cost", subsHandler.TotalServiceSubscriptionsCost)
-	r.Get("/subscriptions/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World!"))
-	})
+	r.Get("/subscriptions/{start}/{end}/total-cost", subsHandler.TotalServiceSubscriptionsCost)
 
-	fmt.Println("Listen on http://localhost:8080/subscriptions/hello")
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
+
+	fmt.Println("Listen on http://localhost:8080/swagger/")
 	http.ListenAndServe(":8080", r)
 }

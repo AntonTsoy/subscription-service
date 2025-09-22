@@ -29,6 +29,17 @@ func NewSubsHandler(service SubscriptionService) *SubsHandler {
 	return &SubsHandler{service: service}
 }
 
+// CreateSubscription godoc
+// @Summary      Создать подписку
+// @Description  Создаёт новую подписку пользователю
+// @Tags         subscriptions
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.SubscriptionRequest true "Subscription data"
+// @Success      201 {object} dto.SubscriptionResponse
+// @Failure      400 {string} string "invalid request"
+// @Failure      500 {string} string "failed to create subscription"
+// @Router       /subscriptions [post]
 func (h *SubsHandler) CreateSubscription(w http.ResponseWriter, r *http.Request) {
 	var req dto.SubscriptionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -52,6 +63,17 @@ func (h *SubsHandler) CreateSubscription(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(dto.ToSubscriptionResponse(sub))
 }
 
+// GetSubscription godoc
+// @Summary      Получить подписку
+// @Description  Возвращает подписку по её ID
+// @Tags         subscriptions
+// @Accept       json
+// @Produce      json
+// @Param        id path int true "Subscription ID"
+// @Success      200 {object} dto.SubscriptionResponse
+// @Failure      400 {string} string "invalid id"
+// @Failure      500 {string} string "failed to get subscription"
+// @Router       /subscriptions/{id} [get]
 func (h *SubsHandler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := getIntPathParam(r, "id")
 	if err != nil {
@@ -70,6 +92,17 @@ func (h *SubsHandler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(dto.ToSubscriptionResponse(sub))
 }
 
+// GetAllSubscriptions godoc
+// @Summary      Список подписок
+// @Description  Возвращает все подписки с пагинацией
+// @Tags         subscriptions
+// @Accept       json
+// @Produce      json
+// @Param        limit query int false "Max items (default 100)"
+// @Param        offset query int false "Offset (default 0)"
+// @Success      200 {array} dto.SubscriptionResponse
+// @Failure      500 {string} string "failed to get subscriptions"
+// @Router       /subscriptions [get]
 func (h *SubsHandler) GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	limit := getIntQueryParam(r, "limit", 100)
 	offset := getIntQueryParam(r, "offset", 0)
@@ -90,6 +123,18 @@ func (h *SubsHandler) GetAllSubscriptions(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(response)
 }
 
+// UpdateSubscription godoc
+// @Summary      Обновить подписку
+// @Description  Обновляет данные подписки по ID
+// @Tags         subscriptions
+// @Accept       json
+// @Produce      json
+// @Param        id path int true "Subscription ID"
+// @Param        request body dto.SubscriptionRequest true "Updated subscription"
+// @Success      204 {string} string "no content"
+// @Failure      400 {string} string "invalid request"
+// @Failure      500 {string} string "failed to update subscription"
+// @Router       /subscriptions/{id} [put]
 func (h *SubsHandler) UpdateSubscription(w http.ResponseWriter, r *http.Request) {
 	var req dto.SubscriptionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -117,6 +162,17 @@ func (h *SubsHandler) UpdateSubscription(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// DeleteSubscription godoc
+// @Summary      Удалить подписку
+// @Description  Удаляет подписку по ID
+// @Tags         subscriptions
+// @Accept       json
+// @Produce      json
+// @Param        id path int true "Subscription ID"
+// @Success      204 {string} string "no content"
+// @Failure      400 {string} string "invalid id"
+// @Failure      500 {string} string "failed to delete subscription"
+// @Router       /subscriptions/{id} [delete]
 func (h *SubsHandler) DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := getIntPathParam(r, "id")
 	if err != nil {
@@ -132,10 +188,24 @@ func (h *SubsHandler) DeleteSubscription(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// TotalServiceSubscriptionsCost godoc
+// @Summary      Общая стоимость подписок
+// @Description  Считает суммарную стоимость подписок пользователя на сервис за период [start; end]
+// @Tags         subscriptions
+// @Accept       json
+// @Produce      json
+// @Param        start path string true "Start date (MM-YYYY)"
+// @Param        end path string true "End date (MM-YYYY)"
+// @Param        user_id query string false "User UUID (optional)"
+// @Param        service_name query string false "Service name (optional)"
+// @Success      200 {object} map[string]int "total cost"
+// @Failure      400 {string} string "invalid parameters"
+// @Failure      500 {string} string "failed to calculate cost"
+// @Router       /subscriptions/summary/{start}/{end} [get]
 func (h *SubsHandler) TotalServiceSubscriptionsCost(w http.ResponseWriter, r *http.Request) {
 	var req dto.TotalSubscriptionsCostRequest
-	req.StartDate = chi.URLParam(r, "start_date")
-	req.EndDate = chi.URLParam(r, "end_date")
+	req.StartDate = chi.URLParam(r, "start")
+	req.EndDate = chi.URLParam(r, "end")
 	if req.StartDate == "" || req.EndDate == "" {
 		http.Error(w, "invalid subscription perion in path parameter", http.StatusBadRequest)
 		return
