@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/AntonTsoy/subscription-service/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -101,14 +102,32 @@ func (r *SubsRepo) Delete(ctx context.Context, id int) error {
 func (r *SubsRepo) ListByUserAndService(ctx context.Context, params *models.ListSubscriptionsParams) ([]models.Subscription, error) {
 	query := `
 		SELECT * FROM subscriptions
-		WHERE user_id = $1
-			AND service_name = $2
-			AND start_date <= $4
-			AND (end_date IS NULL OR end_date >= $3);
+		WHERE start_date <= $2
+			AND (end_date IS NULL OR end_date >= $1)
 	`
 
+	args := []any{params.StartDate, params.EndDate}
+	argIndex := 3
+
+	var conditions []string
+	if params.UserID != nil {
+		conditions = append(conditions, fmt.Sprintf("user_id = $%d", argIndex))
+		args = append(args, *params.UserID)
+		argIndex++
+	}
+	if params.ServiceName != nil {
+		conditions = append(conditions, fmt.Sprintf("service_name = $%d", argIndex))
+		args = append(args, *params.ServiceName)
+		argIndex++
+	}
+
+	if len(conditions) > 0 {
+		query += " AND " + strings.Join(conditions, " AND ")
+	}
+	query += ";"
+
 	var subs []models.Subscription
-	err := r.db.SelectContext(ctx, &subs, query, params.UserID, params.ServiceName, params.StartDate, params.EndDate)
+	err := r.db.SelectContext(ctx, &subs, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка получения подписок: %w", err)
 	}

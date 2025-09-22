@@ -46,6 +46,7 @@ func main() {
 	r.Get("/subscriptions", subsHandler.GetAllSubscriptions)
 	r.Put("/subscriptions/{id}", subsHandler.UpdateSubscription)
 	r.Delete("/subscriptions/{id}", subsHandler.DeleteSubscription)
+	r.Get("/subscriptions/{start_date}/{end_date}/total-cost", subsHandler.TotalServiceSubscriptionsCost)
 	r.Get("/subscriptions/hello", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})

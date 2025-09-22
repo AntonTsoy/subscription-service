@@ -52,3 +52,34 @@ func ToSubscriptionResponse(sub *models.Subscription) *SubscriptionResponse {
 	}
 	return &resp
 }
+
+func ToListSubscriptionsParams(req *TotalSubscriptionsCostRequest) (*models.ListSubscriptionsParams, error) {
+	start, err := time.Parse(layout, req.StartDate)
+	if err != nil {
+		return nil, fmt.Errorf("неверный формат start_date: %w", err)
+	}
+
+	end, err := time.Parse(layout, req.EndDate)
+	if err != nil {
+		return nil, fmt.Errorf("неверный формат end_date: %w", err)
+	}
+
+	model := &models.ListSubscriptionsParams{
+		StartDate: start,
+		EndDate:   end,
+	}
+
+	if req.UserID != "" {
+		id, err := uuid.Parse(req.UserID)
+		if err != nil {
+			return nil, fmt.Errorf("неверный формат user_id: %w", err)
+		}
+		model.UserID = &id
+	}
+
+	if req.ServiceName != "" {
+		model.ServiceName = &req.ServiceName
+	}
+
+	return model, nil
+}

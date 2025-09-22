@@ -16,8 +16,8 @@ type Subscription struct {
 }
 
 type ListSubscriptionsParams struct {
-	UserID      uuid.UUID `db:"user_id"`
-	ServiceName string    `db:"service_name"`
-	StartDate   time.Time `db:"start_date"`
-	EndDate     time.Time `db:"end_date"`
+	StartDate   time.Time  `db:"start_date"`
+	EndDate     time.Time  `db:"end_date"`
+	UserID      *uuid.UUID `db:"user_id"`
+	ServiceName *string    `db:"service_name"`
 }

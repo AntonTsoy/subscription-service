@@ -16,3 +16,10 @@ type SubscriptionResponse struct {
 	StartDate   string `json:"start_date"`
 	EndDate     string `json:"end_date,omitempty"`
 }
+
+type TotalSubscriptionsCostRequest struct {
+	ServiceName string
+	UserID      string
+	StartDate   string
+	EndDate     string
+}

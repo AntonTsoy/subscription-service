@@ -18,6 +18,7 @@ type SubscriptionService interface {
 	GetAll(ctx context.Context, limit, offset int) ([]models.Subscription, error)
 	Update(ctx context.Context, sub *models.Subscription) error
 	Delete(ctx context.Context, id int) error
+	EvaluateTotalServiceSubscriptionsCost(ctx context.Context, subParams *models.ListSubscriptionsParams) (int, error)
 }
 
 type SubsHandler struct {
@@ -131,10 +132,33 @@ func (h *SubsHandler) DeleteSubscription(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *SubsHandler) GetTotalServiceSubscriptionsCost(w http.ResponseWriter, r *http.Request) {
+func (h *SubsHandler) TotalServiceSubscriptionsCost(w http.ResponseWriter, r *http.Request) {
+	var req dto.TotalSubscriptionsCostRequest
+	req.StartDate = chi.URLParam(r, "start_date")
+	req.EndDate = chi.URLParam(r, "end_date")
+	if req.StartDate == "" || req.EndDate == "" {
+		http.Error(w, "invalid subscription perion in path parameter", http.StatusBadRequest)
+		return
+	}
+
+	req.UserID = r.URL.Query().Get("user_id")
+	req.ServiceName = r.URL.Query().Get("service_name")
+
+	subParams, err := dto.ToListSubscriptionsParams(&req)
+	if err != nil {
+		http.Error(w, "invalid request body parameter", http.StatusBadRequest)
+		return
+	}
+
+	totalCost, err := h.service.EvaluateTotalServiceSubscriptionsCost(r.Context(), subParams)
+	if err != nil {
+		http.Error(w, "failed to get subscriptions cost for period", http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	// json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(map[string]int{"totalCost": totalCost})
 }
 
 func getIntPathParam(r *http.Request, key string) (int, error) {

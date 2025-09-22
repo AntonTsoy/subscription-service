@@ -2,10 +2,8 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"github.com/AntonTsoy/subscription-service/internal/models"
-	"github.com/google/uuid"
 )
 
 type SubscriptionRepository interface {
@@ -45,7 +43,22 @@ func (s *SubsService) Delete(ctx context.Context, id int) error {
 	return s.repo.Delete(ctx, id)
 }
 
-func (s *SubsService) EvaluateTotalServiceSubscriptionsCost(ctx context.Context, userID uuid.UUID, serviceName string, start, end time.Time) (int, error) {
-	// TODO: implement right intervals summing
-	return 0, nil
+func (s *SubsService) EvaluateTotalServiceSubscriptionsCost(ctx context.Context, subParams *models.ListSubscriptionsParams) (int, error) {
+	subs, err := s.repo.ListByUserAndService(ctx, subParams)
+	if err != nil {
+		return 0, err
+	}
+
+	totalCost := 0
+	for _, sub := range subs {
+		if sub.StartDate.Before(subParams.StartDate) {
+			sub.StartDate = subParams.StartDate
+		}
+		if sub.EndDate == nil || sub.EndDate.After(subParams.EndDate) {
+			sub.EndDate = &subParams.EndDate
+		}
+
+		totalCost += (1 + int(sub.EndDate.Month()) - int(sub.StartDate.Month())) * sub.Price
+	}
+	return totalCost, nil
 }
