@@ -9,5 +9,4 @@ RUN CGO_ENABLED=0 go build -o server ./cmd/app
 FROM gcr.io/distroless/base-debian12
 WORKDIR /app
 COPY --from=builder /app/server .
-COPY ./migrations ./migrations
 CMD ["./server"]

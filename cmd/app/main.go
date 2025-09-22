@@ -57,6 +57,6 @@ func main() {
 
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
-	log.Println("Server started at http://localhost:8080/swagger/")
+	log.Println("Server started at http://localhost:8080/swagger/index.html")
 	http.ListenAndServe(":8080", r)
 }
