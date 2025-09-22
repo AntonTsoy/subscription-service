@@ -1,9 +1,12 @@
 package logger
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type loggingResponseWriter struct {
@@ -22,11 +25,15 @@ func Logger(next http.Handler) http.Handler {
 
 		lrw := &loggingResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 
+		reqID := uuid.New().String()
+		ctx := context.WithValue(r.Context(), "ReqID", reqID)
+		r = r.WithContext(ctx)
+
 		next.ServeHTTP(lrw, r)
 
 		duration := time.Since(start)
 
-		log.Printf("Method=%s Path=%s Status=%d Duration=%s",
-			r.Method, r.URL.Path, lrw.statusCode, duration)
+		log.Printf("RequestID=%s Method=%s Path=%s Status=%d Duration=%s",
+			reqID, r.Method, r.URL.String(), lrw.statusCode, duration)
 	})
 }

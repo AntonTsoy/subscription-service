@@ -45,20 +45,20 @@ func NewSubsHandler(service SubscriptionService) *SubsHandler {
 func (h *SubsHandler) CreateSubscription(w http.ResponseWriter, r *http.Request) {
 	var req dto.SubscriptionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Printf("неправильное тело запроса для создания подписки: %v", err)
+		log.Printf("RequestID=%s неправильное тело запроса для создания подписки: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
 
 	sub, err := dto.ToSubscription(&req)
 	if err != nil {
-		log.Printf("неправильное формат параметров тела запроса для создания подписки: %v", err)
+		log.Printf("RequestID=%s неправильное формат параметров тела запроса для создания подписки: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "invalid request body parameter", http.StatusBadRequest)
 		return
 	}
 
 	if err := h.service.Create(r.Context(), sub); err != nil {
-		log.Printf("ошибка создания подписки: %v", err)
+		log.Printf("RequestID=%s ошибка создания подписки: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "failed to create subscription", http.StatusInternalServerError)
 		return
 	}
@@ -83,7 +83,7 @@ func (h *SubsHandler) CreateSubscription(w http.ResponseWriter, r *http.Request)
 func (h *SubsHandler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := getIntPathParam(r, "id")
 	if err != nil {
-		log.Printf("некорректная передача id параметра пути запроса: %v", err)
+		log.Printf("RequestID=%s некорректная передача id параметра пути запроса: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "missing or invalid subscription id path parameter value", http.StatusBadRequest)
 		return
 	}
@@ -91,11 +91,11 @@ func (h *SubsHandler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 	sub, err := h.service.GetByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, models.ErrSubscriptionNotFound) {
-			log.Printf("подписка нет в базе данных: %v", err)
+			log.Printf("RequestID=%s подписка нет в базе данных: %v", r.Context().Value("ReqID"), err)
 			http.Error(w, fmt.Sprintf("{'error': 'подписка id %d не найдена'}", id), http.StatusNotFound)
 			return
 		}
-		log.Printf("ошибка получения подписки: %v", err)
+		log.Printf("RequestID=%s ошибка получения подписки: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "failed to get subscription", http.StatusInternalServerError)
 		return
 	}
@@ -122,7 +122,7 @@ func (h *SubsHandler) GetAllSubscriptions(w http.ResponseWriter, r *http.Request
 
 	subscriptions, err := h.service.GetAll(r.Context(), limit, offset)
 	if err != nil {
-		log.Printf("ошибка получения подписок: %v", err)
+		log.Printf("RequestID=%s ошибка получения подписок: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "failed to get all subscriptions", http.StatusInternalServerError)
 		return
 	}
@@ -153,32 +153,32 @@ func (h *SubsHandler) GetAllSubscriptions(w http.ResponseWriter, r *http.Request
 func (h *SubsHandler) UpdateSubscription(w http.ResponseWriter, r *http.Request) {
 	var req dto.SubscriptionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Printf("неправильно тело запроса для обновления подписки: %v", err)
+		log.Printf("RequestID=%s неправильно тело запроса для обновления подписки: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
 
 	newSubData, err := dto.ToSubscription(&req)
 	if err != nil {
-		log.Printf("неправильный параметр тела запроса: %v", err)
+		log.Printf("RequestID=%s неправильный параметр тела запроса: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "invalid request body parameter", http.StatusBadRequest)
 		return
 	}
 
 	newSubData.ID, err = getIntPathParam(r, "id")
 	if err != nil {
-		log.Printf("неправильный параметр пути запроса: %v", err)
+		log.Printf("RequestID=%s неправильный параметр пути запроса: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "missing or invalid subscription id path parameter value", http.StatusBadRequest)
 		return
 	}
 
 	if err := h.service.Update(r.Context(), newSubData); err != nil {
 		if errors.Is(err, models.ErrSubscriptionNotFound) {
-			log.Printf("подписка не существует: %v", err)
+			log.Printf("RequestID=%s подписка не существует: %v", r.Context().Value("ReqID"), err)
 			http.Error(w, fmt.Sprintf("{'error': 'подписка id %d не найдена'}", newSubData.ID), http.StatusNotFound)
 			return
 		}
-		log.Printf("ошибка обновления подписки: %v", err)
+		log.Printf("RequestID=%s ошибка обновления подписки: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "failed to update subscription", http.StatusInternalServerError)
 		return
 	}
@@ -201,18 +201,18 @@ func (h *SubsHandler) UpdateSubscription(w http.ResponseWriter, r *http.Request)
 func (h *SubsHandler) DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := getIntPathParam(r, "id")
 	if err != nil {
-		log.Printf("неправильно тело запроса для удаления подписки: %v", err)
+		log.Printf("RequestID=%s неправильное тело запроса для удаления подписки: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "missing or invalid subscription id path parameter value", http.StatusBadRequest)
 		return
 	}
 
 	if err := h.service.Delete(r.Context(), id); err != nil {
 		if errors.Is(err, models.ErrSubscriptionNotFound) {
-			log.Printf("подписка не существует: %v", err)
+			log.Printf("RequestID=%s подписка не существует: %v", r.Context().Value("ReqID"), err)
 			http.Error(w, fmt.Sprintf("{'error': 'подписка id %d не найдена'}", id), http.StatusNotFound)
 			return
 		}
-		log.Printf("ошибка удаления подписки: %v", err)
+		log.Printf("RequestID=%s ошибка удаления подписки: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "failed to delete subscription", http.StatusInternalServerError)
 		return
 	}
@@ -239,7 +239,7 @@ func (h *SubsHandler) TotalServiceSubscriptionsCost(w http.ResponseWriter, r *ht
 	req.StartDate = chi.URLParam(r, "start")
 	req.EndDate = chi.URLParam(r, "end")
 	if req.StartDate == "" || req.EndDate == "" {
-		log.Printf("некорректный интервал для подсчета стоимости подписок")
+		log.Printf("RequestID=%s некорректный интервал для подсчета стоимости подписок", r.Context().Value("ReqID"))
 		http.Error(w, "invalid subscription perion in path parameter", http.StatusBadRequest)
 		return
 	}
@@ -249,14 +249,14 @@ func (h *SubsHandler) TotalServiceSubscriptionsCost(w http.ResponseWriter, r *ht
 
 	subParams, err := dto.ToListSubscriptionsParams(&req)
 	if err != nil {
-		log.Printf("неправильный параметр тела запроса: %v", err)
+		log.Printf("RequestID=%s неправильный параметр тела запроса: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "invalid request body parameter", http.StatusBadRequest)
 		return
 	}
 
 	totalCost, err := h.service.EvaluateTotalServiceSubscriptionsCost(r.Context(), subParams)
 	if err != nil {
-		log.Printf("ошибка получения стоимости подписок: %v", err)
+		log.Printf("RequestID=%s ошибка получения стоимости подписок: %v", r.Context().Value("ReqID"), err)
 		http.Error(w, "failed to get subscriptions cost for period", http.StatusInternalServerError)
 		return
 	}
