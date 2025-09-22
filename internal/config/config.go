@@ -17,10 +17,12 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("не удалось получить данные из .env конфига: %w", err)
-	}
+	/*
+		err := godotenv.Load()
+		if err != nil {
+			return nil, fmt.Errorf("не удалось получить данные из .env конфига: %w", err)
+		}
+	*/
 
 	return &Config{
 		DBHost:     os.Getenv("DB_HOST"),
