@@ -14,7 +14,7 @@ type SubscriptionRepository interface {
 	GetAll(ctx context.Context, limit, offset int) ([]models.Subscription, error)
 	Update(ctx context.Context, sub *models.Subscription) error
 	Delete(ctx context.Context, id int) error
-	ListByUserAndService(ctx context.Context, userID uuid.UUID, serviceName string, start, end time.Time) ([]models.Subscription, error)
+	ListByUserAndService(ctx context.Context, params *models.ListSubscriptionsParams) ([]models.Subscription, error)
 }
 
 type SubsService struct {

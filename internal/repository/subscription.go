@@ -3,10 +3,8 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/AntonTsoy/subscription-service/internal/models"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,16 +19,15 @@ func NewSubsRepo(db *sqlx.DB) *SubsRepo {
 func (r *SubsRepo) Create(ctx context.Context, sub *models.Subscription) error {
 	query := `
         INSERT INTO subscriptions (service_name, price, user_id, start_date, end_date)
-        VALUES (:service_name, :price, :user_id, :start_date, :end_date)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING id
     `
 
-	stmt, err := r.db.PrepareNamed(query)
+	err := r.db.QueryRowContext(ctx, query, sub.ServiceName, sub.Price, sub.UserID, sub.StartDate, sub.EndDate).Scan(&sub.ID)
 	if err != nil {
-		return fmt.Errorf("подготовка записи подписки: %w", err)
+		return fmt.Errorf("не удалось записать данные подписки: %w", err)
 	}
-
-	return stmt.QueryRowxContext(ctx, sub).Scan(&sub.ID)
+	return nil
 }
 
 func (r *SubsRepo) GetByID(ctx context.Context, id int) (*models.Subscription, error) {
@@ -40,7 +37,6 @@ func (r *SubsRepo) GetByID(ctx context.Context, id int) (*models.Subscription, e
 	if err := r.db.GetContext(ctx, &sub, query, id); err != nil {
 		return nil, fmt.Errorf("ошибка получения подписки: %w", err)
 	}
-
 	return &sub, nil
 }
 
@@ -55,7 +51,6 @@ func (r *SubsRepo) GetAll(ctx context.Context, limit, offset int) ([]models.Subs
 	if err := r.db.SelectContext(ctx, &subs, query, limit, offset); err != nil {
 		return nil, fmt.Errorf("ошибка получения подписок: %w", err)
 	}
-
 	return subs, nil
 }
 
@@ -103,12 +98,7 @@ func (r *SubsRepo) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *SubsRepo) ListByUserAndService(
-	ctx context.Context,
-	userID uuid.UUID,
-	serviceName string,
-	start, end time.Time,
-) ([]models.Subscription, error) {
+func (r *SubsRepo) ListByUserAndService(ctx context.Context, params *models.ListSubscriptionsParams) ([]models.Subscription, error) {
 	query := `
 		SELECT * FROM subscriptions
 		WHERE user_id = $1
@@ -118,9 +108,9 @@ func (r *SubsRepo) ListByUserAndService(
 	`
 
 	var subs []models.Subscription
-	if err := r.db.SelectContext(ctx, &subs, query, userID, serviceName, start, end); err != nil {
+	err := r.db.SelectContext(ctx, &subs, query, params.UserID, params.ServiceName, params.StartDate, params.EndDate)
+	if err != nil {
 		return nil, fmt.Errorf("ошибка получения подписок: %w", err)
 	}
-
 	return subs, nil
 }
