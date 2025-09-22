@@ -185,7 +185,7 @@ paths:
       summary: Обновить подписку
       tags:
       - subscriptions
-  /subscriptions/summary/{start}/{end}:
+  /subscriptions/{start}/{end}/total-cost:
     get:
       consumes:
       - application/json

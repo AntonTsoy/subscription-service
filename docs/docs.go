@@ -106,72 +106,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/subscriptions/summary/{start}/{end}": {
-            "get": {
-                "description": "Считает суммарную стоимость подписок пользователя на сервис за период [start; end]",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "subscriptions"
-                ],
-                "summary": "Общая стоимость подписок",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Start date (MM-YYYY)",
-                        "name": "start",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "End date (MM-YYYY)",
-                        "name": "end",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "User UUID (optional)",
-                        "name": "user_id",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Service name (optional)",
-                        "name": "service_name",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "total cost",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "invalid parameters",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "failed to calculate cost",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/subscriptions/{id}": {
             "get": {
                 "description": "Возвращает подписку по её ID",
@@ -302,6 +236,72 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "failed to delete subscription",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/{start}/{end}/total-cost": {
+            "get": {
+                "description": "Считает суммарную стоимость подписок пользователя на сервис за период [start; end]",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscriptions"
+                ],
+                "summary": "Общая стоимость подписок",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (MM-YYYY)",
+                        "name": "start",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (MM-YYYY)",
+                        "name": "end",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User UUID (optional)",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Service name (optional)",
+                        "name": "service_name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "total cost",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "invalid parameters",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "failed to calculate cost",
                         "schema": {
                             "type": "string"
                         }

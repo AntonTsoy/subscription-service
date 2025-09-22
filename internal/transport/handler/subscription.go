@@ -201,7 +201,7 @@ func (h *SubsHandler) DeleteSubscription(w http.ResponseWriter, r *http.Request)
 // @Success      200 {object} map[string]int "total cost"
 // @Failure      400 {string} string "invalid parameters"
 // @Failure      500 {string} string "failed to calculate cost"
-// @Router       /subscriptions/summary/{start}/{end} [get]
+// @Router       /subscriptions/{start}/{end}/total-cost [get]
 func (h *SubsHandler) TotalServiceSubscriptionsCost(w http.ResponseWriter, r *http.Request) {
 	var req dto.TotalSubscriptionsCostRequest
 	req.StartDate = chi.URLParam(r, "start")
