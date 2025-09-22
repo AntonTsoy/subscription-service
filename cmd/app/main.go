@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -17,6 +16,7 @@ import (
 	"github.com/AntonTsoy/subscription-service/internal/repository"
 	"github.com/AntonTsoy/subscription-service/internal/service"
 	"github.com/AntonTsoy/subscription-service/internal/transport/handler"
+	"github.com/AntonTsoy/subscription-service/internal/transport/logger"
 )
 
 // @title           Subscription Service API
@@ -45,6 +45,7 @@ func main() {
 	subsHandler := handler.NewSubsHandler(subsService)
 
 	r := chi.NewRouter()
+	r.Use(logger.Logger)
 	r.Use(middleware.Timeout(10 * time.Second))
 
 	r.Post("/subscriptions", subsHandler.CreateSubscription)
@@ -56,6 +57,6 @@ func main() {
 
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
-	fmt.Println("Listen on http://localhost:8080/swagger/")
+	log.Println("Server started at http://localhost:8080/swagger/")
 	http.ListenAndServe(":8080", r)
 }
