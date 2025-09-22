@@ -192,12 +192,12 @@ paths:
       description: Считает суммарную стоимость подписок пользователя на сервис за
         период [start; end]
       parameters:
-      - description: Start date (YYYY-MM-DD)
+      - description: Start date (MM-YYYY)
         in: path
         name: start
         required: true
         type: string
-      - description: End date (YYYY-MM-DD)
+      - description: End date (MM-YYYY)
         in: path
         name: end
         required: true

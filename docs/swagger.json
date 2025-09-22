@@ -118,14 +118,14 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Start date (YYYY-MM-DD)",
+                        "description": "Start date (MM-YYYY)",
                         "name": "start",
                         "in": "path",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "End date (YYYY-MM-DD)",
+                        "description": "End date (MM-YYYY)",
                         "name": "end",
                         "in": "path",
                         "required": true
