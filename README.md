@@ -10,7 +10,7 @@ POSTGRES_PASSWORD=never_guess_password
 POSTGRES_DB=subs
 
 # Подключение приложения к БД
-DB_HOST=postgres
+DB_HOST=db
 DB_PORT=5432
 DB_USER=${POSTGRES_USER}
 DB_PASSWORD=${POSTGRES_PASSWORD}
