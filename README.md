@@ -36,14 +36,14 @@ DB_NAME=${POSTGRES_DB}
 DB_SSL=disable
 ```
 
-1. Собрать и запустить сервис
+3. Собрать и запустить сервис
 ```bash
 docker compose up --build
 ```
 
-1. Приложение будет доступно на http://localhost:8080
+4. Приложение будет доступно на http://localhost:8080
 
-2. Swagger-документация доступна по адресу http://localhost:8080/swagger/index.html
+5. Swagger-документация доступна по адресу http://localhost:8080/swagger/index.html
 
 ## API
 
