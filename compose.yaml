@@ -24,8 +24,6 @@ services:
     container_name: migrate_db
     volumes:
       - ./migrations:/migrations
-    networks:
-      - backend
     command: [
       "-path", "/migrations",
       "-database", "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL}",
@@ -34,6 +32,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - backend
 
   app:
     build: .
